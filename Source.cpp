@@ -5,8 +5,12 @@
 #include <random>
 #include <ctime>
 #include <iostream>
+#include <algorithm>
 using namespace std;
 using namespace std::chrono;
+int compare(const void * a, const void * b) {
+	return (*(int*)a - *(int*)b);
+}
 int * generate(int size) {
 	int *arr = new int[size];
 	random_device seed;
@@ -32,7 +36,8 @@ int get_best_border(int *array, int size) {
 		auto start = system_clock::now();
 		sort->sort(temp_arr, size);
 		auto end = system_clock::now();
-		auto time = duration_cast<milliseconds>(end - start).count();
+		//auto time = duration_cast<milliseconds>(end - start).count();
+		auto time = duration_cast<microseconds>(end - start).count();
 		if (time < t) {
 			t = time;
 			border = i;
@@ -48,13 +53,10 @@ bool compare(int * original_arr, int size) {
 	memcpy(tmpArrqs, original_arr, size);
 	int * tmpArrpqs = new int[size];
 	memcpy(tmpArrpqs, original_arr, size);
-	//cout << "Stworzono tablice" << endl;
 	Sort* qsort = new QuickSort();
 	qsort->sort(tmpArrqs,size);
-	//cout << "Sort szeregowy" << endl;
 	Sort *pqsort = new PQuickSort();
 	pqsort->sort(tmpArrpqs,size);
-	//cout << "Sort rownolegly" << endl;
 	for (int i = 0; i < size; i++)
 		if (tmpArrqs[i] != tmpArrpqs[i]) {
 			cout << "Not this same"<<endl;
@@ -66,11 +68,11 @@ bool compare(int * original_arr, int size) {
 	return true;
 }
 int main() {
-	constexpr int SIZE = 5000;
+	constexpr int SIZE = 10000;
 	int * original_arr = generate(SIZE);
 	//compare(original_arr, SIZE);
-	//int bor = get_best_border(original_arr, SIZE);
-	{
+	int bor = get_best_border(original_arr, SIZE);
+	/*{
 		cout << "---SZEREGOWO----" << endl;
 		int * tmpTab = new int[SIZE];
 		memcpy(tmpTab, original_arr, SIZE);
@@ -113,7 +115,7 @@ int main() {
 		cout << "Pomiar 3 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		delete sort;
 		delete[]tmpTab;
-	}
+	}*/
 	cin.ignore();
 	delete[]original_arr;
 	return 0;
