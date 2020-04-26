@@ -12,7 +12,7 @@ using namespace std::chrono;
 // if Mode =1 std::array,else raw ptr array 
 #define MODE 1
 #if MODE==1
-constexpr size_t SIZE = 1000000;
+constexpr size_t SIZE = 250000;
 //mode =1 parallel, mode =0 recursive
 void sort(std::array<int, SIZE>& array, int mode, int border=0);
 void psort(std::array<int, SIZE>& array, int start, int end,int border);
@@ -20,7 +20,7 @@ void rsort(std::array<int, SIZE>&array, int start, int end);
 int split(std::array<int, SIZE>&arr, int start, int end);
 array<int, SIZE>* generate();
 int get_best_border(const array<int, SIZE>& array);
-bool compare(std::array<int, SIZE>* original_arr);
+bool compare(std::array<int, SIZE>& original_arr);
 //
 void sort(std::array<int, SIZE>& array, int mode ,int border) {
 	if (mode == 1)
@@ -102,13 +102,16 @@ array<int, SIZE>* generate() {
 	return arr;
 }
 int get_best_border(const array<int, SIZE>& array) {
-	int min = 100;
+	int min = 500;
 	int max = 20000 < SIZE ? 20000 : SIZE;
+	cout <<"Max "<< max << endl;
 	int border = 0;
-	long long t = 10000000000000;
+	int counter = 0;
+	long long t = 20000;
 	for (int i = min; i < max; i += 100) {
 		std::array<int, SIZE>*temp_arr =new std::array<int,SIZE>;
 		*temp_arr = array;
+		cout << i << endl;
 		auto start = system_clock::now();
 		sort(*temp_arr, 1, i);
 		auto end = system_clock::now();
@@ -116,6 +119,16 @@ int get_best_border(const array<int, SIZE>& array) {
 		if (time < t) {
 			t = time;
 			border = i;
+			cout << "New max" << endl;
+			counter = 0;
+		}
+		else {
+			counter++;
+			if (counter > 12) {
+				delete temp_arr;
+				cout << "Best time is " << t << " for " << border << " border" << endl;
+				return border;
+			}
 		}
 		delete temp_arr;
 	}
@@ -168,12 +181,12 @@ int main() {
 		std::array<int, SIZE>* tmpArr = new std::array<int, SIZE>;
 		*tmpArr = *original_arr;
 		auto t1 = system_clock::now();
-		sort(*tmpArr,1,4000);
+		sort(*tmpArr,1,1000);
 		auto t2 = system_clock::now();
 		cout << "Pomiar 1 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		*tmpArr = *original_arr;
 		t1 = system_clock::now();
-		sort(*tmpArr, 1, 4000);
+		sort(*tmpArr, 1, 2000);
 		t2 = system_clock::now();
 		cout << "Pomiar 2 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		*tmpArr = *original_arr;
