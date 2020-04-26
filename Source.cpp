@@ -13,6 +13,7 @@ using namespace std::chrono;
 #define MODE 1
 #if MODE==1
 constexpr size_t SIZE = 1000000;
+//mode =1 parallel, mode =0 recursive
 void sort(std::array<int, SIZE>& array, int mode, int border=0);
 void psort(std::array<int, SIZE>& array, int start, int end,int border);
 void rsort(std::array<int, SIZE>&array, int start, int end);
@@ -20,7 +21,7 @@ int split(std::array<int, SIZE>&arr, int start, int end);
 array<int, SIZE>* generate();
 int get_best_border(const array<int, SIZE>& array);
 bool compare(std::array<int, SIZE>* original_arr);
-/////
+//
 void sort(std::array<int, SIZE>& array, int mode ,int border) {
 	if (mode == 1)
 		psort(array, 0, array.size() - 1, border);
@@ -101,50 +102,48 @@ array<int, SIZE>* generate() {
 	return arr;
 }
 int get_best_border(const array<int, SIZE>& array) {
-	//int min = 100;
-	//int max = 20000 < SIZE ? 20000 : SIZE;
-	//int border = 0;
-	//long long t = 10000000000000;
-	//for (int i = min; i < max; i += 100) {
-	//	std::array<int, SIZE>temp_arr = array;
-	//	Sort* sort = new PQuickSort(i);
-	//	auto start = system_clock::now();
-	//	sort->sort(temp_arr, SIZE);
-	//	auto end = system_clock::now();
-	//	auto time = duration_cast<milliseconds>(end - start).count();
-	//	//auto time = duration_cast<microseconds>(end - start).count();
-	//	if (time < t) {
-	//		t = time;
-	//		border = i;
-	//	}
-	//	delete sort;
-	//}
-	//cout << "Best time is " << t << " for " << border << " border" << endl;
-	//return border;
-	return -1;
+	int min = 100;
+	int max = 20000 < SIZE ? 20000 : SIZE;
+	int border = 0;
+	long long t = 10000000000000;
+	for (int i = min; i < max; i += 100) {
+		std::array<int, SIZE>*temp_arr =new std::array<int,SIZE>;
+		*temp_arr = array;
+		auto start = system_clock::now();
+		sort(*temp_arr, 1, i);
+		auto end = system_clock::now();
+		auto time = duration_cast<milliseconds>(end - start).count();
+		if (time < t) {
+			t = time;
+			border = i;
+		}
+		delete temp_arr;
+	}
+	cout << "Best time is " << t << " for " << border << " border" << endl;
+	return border;
 }
-bool compare(std::array<int,SIZE>* original_arr) {
-	/*int * tmpArrqs = new int[SIZE];
-	memcpy(tmpArrqs, original_arr, SIZE);
-	int * tmpArrpqs = new int[SIZE];
-	memcpy(tmpArrpqs, original_arr, SIZE);
-	Sort* qsort = new QuickSort();
-	qsort->sort(tmpArrqs, SIZE);
-	Sort *pqsort = new PQuickSort();
-	pqsort->sort(tmpArrpqs, SIZE);
+bool compare(std::array<int,SIZE>& original_arr) {
+	std::array<int, SIZE>*temp_arrqs = new std::array<int, SIZE>;
+	std::array<int, SIZE>*temp_arrpqs = new std::array<int, SIZE>;
+	*temp_arrpqs = original_arr;
+	*temp_arrqs = original_arr;
+	sort(*temp_arrpqs, 1);
+	sort(*temp_arrqs, 0);
 	for (int i = 0; i < SIZE; i++)
-		if (tmpArrqs[i] != tmpArrpqs[i]) {
+		if ((*temp_arrqs)[i] != (*temp_arrpqs)[i]) {
 			cout << "Not this same" << endl;
 			return false;
 		}
 	cout << "This same" << endl;
-	delete[] tmpArrqs;
-	delete[] tmpArrpqs;*/
+	
+	delete temp_arrqs;
+	delete temp_arrpqs;
 	return true;
 }
 int main() {
 	std::array<int, SIZE> * original_arr = generate();
-	{
+	get_best_border(*original_arr);
+	/*{
 		cout << "----SZEREGOWO----" << endl;
 		std::array<int, SIZE>* tmpArr = new std::array<int, SIZE>;
 		*tmpArr = *original_arr;
@@ -163,8 +162,8 @@ int main() {
 		t2 = system_clock::now();
 		cout << "Pomiar 3 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		delete tmpArr;
-	}
-	{
+	}*/
+	/*{
 		cout << "----ROWNOLEGLE----" << endl;
 		std::array<int, SIZE>* tmpArr = new std::array<int, SIZE>;
 		*tmpArr = *original_arr;
@@ -183,7 +182,7 @@ int main() {
 		t2 = system_clock::now();
 		cout << "Pomiar 3 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		delete tmpArr;
-	}
+	}*/
 	cin.ignore();
 	delete original_arr;
 	return 0;
