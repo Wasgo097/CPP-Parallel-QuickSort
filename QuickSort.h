@@ -2,6 +2,7 @@
 #include "Sort.h"
 //std::swap
 #include <algorithm>
+#include <array>
 class QuickSort :public Sort{
 public:
 	// Inherited via Sort
@@ -33,4 +34,33 @@ protected:
 		return j;
 	}
 };
-
+template<int size>
+class QuickSortTMP :public SortTMP<size> {
+public:
+	virtual void sort(std::array<int, size>&array)override {
+		rsort(array, 0, array.size()-1);
+	}
+	QuickSortTMP(){}
+protected:
+	void rsort(std::array<int, size>&array, int start, int end) {
+		int j = split(array, start, end);
+		if (start < j)
+			rsort(array, start, j - 1);
+		if (j + 1 < end)
+			rsort(array, j + 1, end);
+	}
+	int split(std::array<int, size>&arr, int start, int end) {
+		int i = (start + end) / 2;
+		int pivot = arr[i];
+		std::swap(arr[i], arr[end]);
+		int j = start;
+		for (i = start; i < end; i++)
+			if (arr[i] < pivot) {
+				std::swap(arr[i], arr[j]);
+				j++;
+			}
+		arr[end] = arr[j];
+		arr[j] = pivot;
+		return j;
+	}
+};
