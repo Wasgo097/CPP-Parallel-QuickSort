@@ -12,7 +12,7 @@ using namespace std::chrono;
 // if Mode =1 std::array,else raw ptr array 
 #define MODE 1
 #if MODE==1
-constexpr size_t SIZE = 250000;
+constexpr size_t SIZE = 1500000;
 //mode =1 parallel, mode =0 recursive
 void sort(std::array<int, SIZE>& array, int mode, int border=0);
 void psort(std::array<int, SIZE>& array, int start, int end,int border);
@@ -30,39 +30,47 @@ void sort(std::array<int, SIZE>& array, int mode ,int border) {
 }
 void psort(std::array<int, SIZE>& array, int start, int end,int border) {
 	int j = split(array, start, end);
-	std::future<void> * t1 = nullptr;
-	std::future<void> * t2 = nullptr;
+	//std::future<void> * t1 = nullptr;
+	//std::future<void> * t2 = nullptr;
+	std::thread * t1 = nullptr;
+	std::thread * t2 = nullptr;
 	//border<=0 sorting is full parallel, border>0 bellow border elements sorting is recursive
 	if (border <= 0) {
 		if (start < j) {
-			t1 = new std::future<void>();
-			*t1 = std::async(std::launch::async, &psort, std::ref(array), start, j - 1,border);
+			//t1 = new std::future<void>();
+			//*t1 = std::async(std::launch::async, &psort, std::ref(array), start, j - 1,border);
+			t1 = new std::thread(&psort, std::ref(array), start, j - 1, border);
 		}
 		if (j + 1 < end) {
-			t2 = new std::future<void>();
-			*t2 = std::async(std::launch::async, &psort, std::ref(array), j + 1, end, border);
+			/*t2 = new std::future<void>();
+			*t2 = std::async(std::launch::async, &psort, std::ref(array), j + 1, end, border);*/
+			t2 = new std::thread(&psort, std::ref(array), j + 1, end, border);
 		}
 	}
 	else {
 		if (j - start > border) {
-			t1 = new std::future<void>();
-			*t1 = std::async(std::launch::async, &psort, std::ref(array), start, j - 1,border);
+			/*t1 = new std::future<void>();
+			*t1 = std::async(std::launch::async, &psort, std::ref(array), start, j - 1,border);*/
+			t1 = new std::thread(&psort, std::ref(array), start, j - 1, border);
 		}
 		else if (j - start > 0)
 			rsort(array, start, j - 1);
 		if (border < end - (j + 1)) {
-			t2 = new std::future<void>();
-			*t2 = std::async(std::launch::async, &psort, std::ref(array), j + 1, end,border);
+			/*t2 = new std::future<void>();
+			*t2 = std::async(std::launch::async, &psort, std::ref(array), j + 1, end,border);*/
+			t2 = new std::thread(&psort, std::ref(array), j + 1, end, border);
 		}
 		else if (end - (j + 1) > 0)
 			rsort(array, j + 1, end);
 	}
 	if (t1 != nullptr) {
-		t1->get();
+		//t1->get();
+		t1->join();
 		delete t1;
 	}
 	if (t2 != nullptr) {
-		t2->get();
+		//t2->get();
+		t2->join();
 		delete t2;
 	}
 }
@@ -111,7 +119,6 @@ int get_best_border(const array<int, SIZE>& array) {
 	for (int i = min; i < max; i += 100) {
 		std::array<int, SIZE>*temp_arr =new std::array<int,SIZE>;
 		*temp_arr = array;
-		cout << i << endl;
 		auto start = system_clock::now();
 		sort(*temp_arr, 1, i);
 		auto end = system_clock::now();
@@ -155,8 +162,8 @@ bool compare(std::array<int,SIZE>& original_arr) {
 }
 int main() {
 	std::array<int, SIZE> * original_arr = generate();
-	get_best_border(*original_arr);
-	/*{
+	//get_best_border(*original_arr);
+	{
 		cout << "----SZEREGOWO----" << endl;
 		std::array<int, SIZE>* tmpArr = new std::array<int, SIZE>;
 		*tmpArr = *original_arr;
@@ -175,13 +182,13 @@ int main() {
 		t2 = system_clock::now();
 		cout << "Pomiar 3 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		delete tmpArr;
-	}*/
-	/*{
+	}
+	{
 		cout << "----ROWNOLEGLE----" << endl;
 		std::array<int, SIZE>* tmpArr = new std::array<int, SIZE>;
 		*tmpArr = *original_arr;
 		auto t1 = system_clock::now();
-		sort(*tmpArr,1,1000);
+		sort(*tmpArr,1,2000);
 		auto t2 = system_clock::now();
 		cout << "Pomiar 1 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		*tmpArr = *original_arr;
@@ -191,12 +198,12 @@ int main() {
 		cout << "Pomiar 2 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		*tmpArr = *original_arr;
 		t1 = system_clock::now();
-		sort(*tmpArr, 1, 4000);
+		sort(*tmpArr, 1, 2000);
 		t2 = system_clock::now();
 		cout << "Pomiar 3 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		delete tmpArr;
-	}*/
-	cin.ignore();
+	}
+	//cin.ignore();
 	delete original_arr;
 	return 0;
 }
