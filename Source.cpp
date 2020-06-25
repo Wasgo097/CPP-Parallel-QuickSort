@@ -9,8 +9,9 @@
 #include <algorithm>
 using namespace std;
 using namespace std::chrono;
+constexpr int SIZE = 100000;
 // if Mode =1 std::array,else raw ptr array 
-#define MODE 1
+#define MODE 2
 #if MODE==1
 constexpr size_t SIZE = 1500000;
 //mode =1 parallel, mode =0 recursive
@@ -227,9 +228,10 @@ int get_best_border(int *array, int size) {
 	int max = 20000 < size ? 20000 : size;
 	int border = 0;
 	long long t = 10000000000000;
+	int breaker = 5;
 	for (int i = min; i < max; i += 100) {
 		int * temp_arr = new int[size];
-		memcpy(temp_arr, array, size);
+		memcpy(temp_arr, array, size * sizeof(int));
 		Sort* sort = new PQuickSort(i);
 		auto start = system_clock::now();
 		sort->sort(temp_arr, size);
@@ -239,9 +241,16 @@ int get_best_border(int *array, int size) {
 		if (time < t) {
 			t = time;
 			border = i;
+			breaker = 5;
 		}
-		delete sort;
-		delete[] temp_arr;
+		else {
+			breaker--;
+			if (breaker == 0) {
+				delete sort;
+				delete[] temp_arr;
+				break;
+			}
+		}
 	}
 	cout << "Best time is " << t << " for " << border << " border" << endl;
 	return border;
@@ -266,25 +275,25 @@ bool compare(int * original_arr, int size) {
 	return true;
 }
 int main() {
-	constexpr int SIZE = 1000000;
 	int * original_arr = generate(SIZE);
-	compare(original_arr, SIZE);
+	//compare(original_arr, SIZE);
+	//int bor = 4000;
 	int bor = get_best_border(original_arr, SIZE);
 	{
 		cout << "---SZEREGOWO----" << endl;
 		int * tmpTab = new int[SIZE];
-		memcpy(tmpTab, original_arr, SIZE);
+		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
 		Sort *sort = new QuickSort();
 		auto t1 = system_clock::now();
 		sort->sort(tmpTab,SIZE);
 		auto t2 = system_clock::now();
 		cout << "Pomiar 1 " << duration_cast<milliseconds>(t2-t1).count() << endl;
-		memcpy(tmpTab, original_arr, SIZE);
+		memcpy(tmpTab, original_arr, SIZE * sizeof(int));
 		t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		t2 = system_clock::now();
 		cout << "Pomiar 2 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
-		memcpy(tmpTab, original_arr, SIZE);
+		memcpy(tmpTab, original_arr, SIZE * sizeof(int));
 		t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		t2 = system_clock::now();
@@ -295,18 +304,18 @@ int main() {
 	{
 		cout << "---ROWNOLEGLE----" << endl;
 		int * tmpTab = new int[SIZE];
-		memcpy(tmpTab, original_arr, SIZE);
-		Sort *sort = new PQuickSort();
+		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
+		Sort *sort = new PQuickSort(bor);
 		auto t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		auto t2 = system_clock::now();
 		cout << "Pomiar 1 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
-		memcpy(tmpTab, original_arr, SIZE);
+		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
 		t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		t2 = system_clock::now();
 		cout << "Pomiar 2 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
-		memcpy(tmpTab, original_arr, SIZE);
+		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
 		t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		t2 = system_clock::now();
@@ -314,8 +323,8 @@ int main() {
 		delete sort;
 		delete[]tmpTab;
 	}
-	cin.ignore();
 	delete[]original_arr;
+	cin.ignore();
 	return 0;
 }
 #endif // STD==1
