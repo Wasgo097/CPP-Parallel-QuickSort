@@ -9,7 +9,7 @@
 #include <algorithm>
 using namespace std;
 using namespace std::chrono;
-constexpr int SIZE = 100000;
+constexpr int SIZE = 150000;
 // if Mode =1 std::array,else raw ptr array 
 #define MODE 2
 #if MODE==1
@@ -224,20 +224,20 @@ int * generate(int size) {
 	return arr;
 }
 int get_best_border(int *array, int size) {
-	int min = 100;
+	int min = 1000;
 	int max = 20000 < size ? 20000 : size;
 	int border = 0;
 	long long t = 10000000000000;
 	int breaker = 5;
+	int * temp_arr = new int[size];
 	for (int i = min; i < max; i += 100) {
-		int * temp_arr = new int[size];
 		memcpy(temp_arr, array, size * sizeof(int));
 		Sort* sort = new PQuickSort(i);
 		auto start = system_clock::now();
 		sort->sort(temp_arr, size);
 		auto end = system_clock::now();
-		//auto time = duration_cast<milliseconds>(end - start).count();
 		auto time = duration_cast<microseconds>(end - start).count();
+		delete sort;
 		if (time < t) {
 			t = time;
 			border = i;
@@ -245,41 +245,38 @@ int get_best_border(int *array, int size) {
 		}
 		else {
 			breaker--;
-			if (breaker == 0) {
-				delete sort;
-				delete[] temp_arr;
+			if (breaker == 0) 
 				break;
-			}
 		}
 	}
+	delete[] temp_arr;
 	cout << "Best time is " << t << " for " << border << " border" << endl;
 	return border;
 }
 bool compare(int * original_arr, int size) {
 	int * tmpArrqs = new int[size];
-	memcpy(tmpArrqs, original_arr, size);
+	memcpy(tmpArrqs, original_arr, size*sizeof(int));
 	int * tmpArrpqs = new int[size];
-	memcpy(tmpArrpqs, original_arr, size);
+	memcpy(tmpArrpqs, original_arr, size * sizeof(int));
 	Sort* qsort = new QuickSort();
 	qsort->sort(tmpArrqs, size);
 	Sort *pqsort = new PQuickSort();
 	pqsort->sort(tmpArrpqs, size);
 	for (int i = 0; i < size; i++)
-		if (tmpArrqs[i] != tmpArrpqs[i]) {
-			cout << "Not this same" << endl;
+		if (tmpArrqs[i] != tmpArrpqs[i])
 			return false;
-		}
-	cout << "This same" << endl;
 	delete[] tmpArrqs;
 	delete[] tmpArrpqs;
 	return true;
 }
 int main() {
 	int * original_arr = generate(SIZE);
-	//compare(original_arr, SIZE);
+	cout << "Generate done" << endl;
+	/*if (compare(original_arr, SIZE)) cout << "Not this same" << endl;
+	else cout << "This same" << endl;*/
 	//int bor = 4000;
 	int bor = get_best_border(original_arr, SIZE);
-	{
+	/*{
 		cout << "---SZEREGOWO----" << endl;
 		int * tmpTab = new int[SIZE];
 		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
@@ -322,9 +319,9 @@ int main() {
 		cout << "Pomiar 3 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		delete sort;
 		delete[]tmpTab;
-	}
+	}*/
 	delete[]original_arr;
-	cin.ignore();
+	//cin.ignore();
 	return 0;
 }
 #endif // STD==1
