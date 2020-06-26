@@ -3,9 +3,11 @@
 #include<chrono>
 #include <future>
 #include <array>
+#include <atomic>
 #include "QuickSort.h"
 class PQuickSort :public QuickSort{
 	int border;
+	std::atomic_int threads = 32;
 public:
 	// Inherited via Sort
 	virtual void sort(int * array, size_t size) override{
@@ -13,6 +15,9 @@ public:
 	}
 	PQuickSort(int border = 0) {
 		this->border = border;
+	}
+	virtual void reset()override {
+		threads = 32;
 	}
 protected:
 	//parallel sort
@@ -27,12 +32,16 @@ protected:
 				t2 = new std::thread(&PQuickSort::psort, this, array, j + 1, end);
 		}
 		else {
-			if (j - start > border)
+			if ((j - start > border)&&threads>0) {
 				t1 = new std::thread(&PQuickSort::psort, this, array, start, j - 1);
+				threads--;
+			}
 			else if (j - start > 0)
 				rsort(array, start, j - 1);
-			if (border < end - (j + 1))
+			if ((border < end - (j + 1)) && threads>0) {
 				t2 = new std::thread(&PQuickSort::psort, this, array, j + 1, end);
+				threads--;
+			}
 			else if (end - (j + 1) > 0)
 				rsort(array, j + 1, end);
 		}

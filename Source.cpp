@@ -9,7 +9,7 @@
 #include <algorithm>
 using namespace std;
 using namespace std::chrono;
-constexpr int SIZE = 150000;
+constexpr int SIZE = 1500000;
 // if Mode =1 std::array,else raw ptr array 
 #define MODE 2
 #if MODE==1
@@ -274,9 +274,9 @@ int main() {
 	cout << "Generate done" << endl;
 	/*if (compare(original_arr, SIZE)) cout << "Not this same" << endl;
 	else cout << "This same" << endl;*/
-	//int bor = 4000;
-	int bor = get_best_border(original_arr, SIZE);
-	/*{
+	int bor = 2000;
+	//int bor = get_best_border(original_arr, SIZE);
+	{
 		cout << "---SZEREGOWO----" << endl;
 		int * tmpTab = new int[SIZE];
 		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
@@ -306,22 +306,26 @@ int main() {
 		auto t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		auto t2 = system_clock::now();
+		sort->reset();
 		cout << "Pomiar 1 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
 		t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		t2 = system_clock::now();
+		sort->reset();
 		cout << "Pomiar 2 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
 		t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		t2 = system_clock::now();
+		sort->reset();
 		cout << "Pomiar 3 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		delete sort;
 		delete[]tmpTab;
-	}*/
+	}
 	delete[]original_arr;
-	//cin.ignore();
+	cout << "Koniec" << endl;
+	cin.ignore();
 	return 0;
 }
 #endif // STD==1

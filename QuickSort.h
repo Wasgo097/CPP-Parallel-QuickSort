@@ -32,4 +32,5 @@ protected:
 		arr[j] = pivot;
 		return j;
 	}
+	virtual void reset()override{}
 };
