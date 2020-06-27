@@ -223,10 +223,10 @@ int * generate(int size) {
 		arr[i] = range(random);
 	return arr;
 }
-int get_best_border(int *array, int size) {
+int get_best_threshold(int *array, int size) {
 	int min = 1000;
 	int max = 20000 < size ? 20000 : size;
-	int border = 0;
+	int threshold = 0;
 	long long t = 10000000000000;
 	int breaker = 5;
 	int * temp_arr = new int[size];
@@ -240,7 +240,7 @@ int get_best_border(int *array, int size) {
 		delete sort;
 		if (time < t) {
 			t = time;
-			border = i;
+			threshold = i;
 			breaker = 5;
 		}
 		else {
@@ -250,32 +250,83 @@ int get_best_border(int *array, int size) {
 		}
 	}
 	delete[] temp_arr;
-	cout << "Best time is " << t << " for " << border << " border" << endl;
-	return border;
+	//cout << "Best time is " << t << " for " << threshold << " threashold" << endl;
+	return threshold;
+}
+int get_best_threads(int *array, int size) {
+	int min = 8;
+	int max = 32;
+	int threads = 0;
+	long long t = 10000000000000;
+	int breaker = 5;
+	int * temp_arr = new int[size];
+	for (int i = min; i < max; i ++) {
+		memcpy(temp_arr, array, size * sizeof(int));
+		Sort* sort = new PQuickSort(1500,i);
+		auto start = system_clock::now();
+		sort->sort(temp_arr, size);
+		auto end = system_clock::now();
+		auto time = duration_cast<microseconds>(end - start).count();
+		delete sort;
+		if (time < t) {
+			t = time;
+			threads = i;
+			breaker = 5;
+		}
+		else {
+			breaker--;
+			if (breaker == 0)
+				break;
+		}
+	}
+	delete[] temp_arr;
+	cout << "Best time is " << t << " for " << threads << " threads" << endl;
+	return threads;
 }
 bool compare(int * original_arr, int size) {
+	bool flag = true;
 	int * tmpArrqs = new int[size];
 	memcpy(tmpArrqs, original_arr, size*sizeof(int));
 	int * tmpArrpqs = new int[size];
 	memcpy(tmpArrpqs, original_arr, size * sizeof(int));
 	Sort* qsort = new QuickSort();
 	qsort->sort(tmpArrqs, size);
-	Sort *pqsort = new PQuickSort();
+	Sort* pqsort = new PQuickSort(1500,12);
 	pqsort->sort(tmpArrpqs, size);
 	for (int i = 0; i < size; i++)
-		if (tmpArrqs[i] != tmpArrpqs[i])
-			return false;
+		if (tmpArrqs[i] != tmpArrpqs[i]) {
+			flag = false;
+			break;
+		}
 	delete[] tmpArrqs;
 	delete[] tmpArrpqs;
-	return true;
+	delete pqsort;
+	delete qsort;
+	return flag;
 }
 int main() {
 	int * original_arr = generate(SIZE);
 	cout << "Generate done" << endl;
-	/*if (compare(original_arr, SIZE)) cout << "Not this same" << endl;
-	else cout << "This same" << endl;*/
-	int bor = 2000;
+	/*if (compare(original_arr, SIZE)) cout << "This same" << endl;
+	else cout << "Not this same" << endl;*/
 	//int bor = get_best_border(original_arr, SIZE);
+	int bor = 1500;
+	//int threads = get_best_threads(original_arr, SIZE);
+	int threads = 15;
+	/*{
+		int sum = 0;
+		for (int i = 0; i < 100; i++)
+			sum += get_best_threshold(original_arr, SIZE);
+		sum /= 100;
+		cout <<"Average for threasgold "<< sum << endl;
+	}*/
+	/*{
+		int sum = 0;
+		for (int i = 0; i < 100; i++)
+			sum += get_best_threads(original_arr, SIZE);
+		sum /= 100;
+		cout <<"Average for threads "<< sum << endl;
+	}*/
 	{
 		cout << "---SZEREGOWO----" << endl;
 		int * tmpTab = new int[SIZE];
@@ -302,7 +353,7 @@ int main() {
 		cout << "---ROWNOLEGLE----" << endl;
 		int * tmpTab = new int[SIZE];
 		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
-		Sort *sort = new PQuickSort(bor);
+		Sort *sort = new PQuickSort(bor,threads);
 		auto t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		auto t2 = system_clock::now();
