@@ -280,7 +280,7 @@ int get_best_threads(int *array, int size) {
 		}
 	}
 	delete[] temp_arr;
-	cout << "Best time is " << t << " for " << threads << " threads" << endl;
+	//cout << "Best time is " << t << " for " << threads << " threads" << endl;
 	return threads;
 }
 bool compare(int * original_arr, int size) {
@@ -357,26 +357,26 @@ int main() {
 		auto t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		auto t2 = system_clock::now();
-		sort->reset();
+		//sort->reset();
 		cout << "Pomiar 1 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
 		t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		t2 = system_clock::now();
-		sort->reset();
+		//sort->reset();
 		cout << "Pomiar 2 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		memcpy(tmpTab, original_arr, SIZE*sizeof(int));
 		t1 = system_clock::now();
 		sort->sort(tmpTab, SIZE);
 		t2 = system_clock::now();
-		sort->reset();
+		//sort->reset();
 		cout << "Pomiar 3 " << duration_cast<milliseconds>(t2 - t1).count() << endl;
 		delete sort;
 		delete[]tmpTab;
 	}
 	delete[]original_arr;
 	cout << "Koniec" << endl;
-	cin.ignore();
+	//cin.ignore();
 	return 0;
 }
 #endif // STD==1

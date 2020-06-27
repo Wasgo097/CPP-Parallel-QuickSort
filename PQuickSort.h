@@ -1,13 +1,14 @@
 #pragma once
-#include<thread>
-#include<chrono>
+#include <thread>
+#include <chrono>
+#include <array>
 #include <future>
 #include <array>
 #include <atomic>
 #include "QuickSort.h"
 class PQuickSort :public QuickSort{
 	int threshold;
-	std::atomic_int threads = 12;
+	std::atomic_int threads;
 	const int threds_reset;
 public:
 	// Inherited via Sort
@@ -18,35 +19,25 @@ public:
 		this->threshold = border;
 		this->threads = threads;
 	}
-	virtual void reset()override {
-		threads = threds_reset;
-	}
+	//virtual void reset()override {//threads = threds_reset;}
 protected:
 	//parallel sort
 	void psort(int *array, int start, int end) {
 		int j = split(array, start, end);
 		std::thread* t1 = nullptr;
 		std::thread* t2 = nullptr;
-		if (threshold <= 0) {
-			if (start < j) 
-				t1 = new std::thread(&PQuickSort::psort, this, array, start, j - 1);
-			if (j + 1 < end) 
-				t2 = new std::thread(&PQuickSort::psort, this, array, j + 1, end);
+		if ((j - start > threshold)&&threads>0) {
+			t1 = new std::thread(&PQuickSort::psort, this, array, start, j - 1);
+			threads--;
 		}
-		else {
-			if ((j - start > threshold)&&threads>0) {
-				t1 = new std::thread(&PQuickSort::psort, this, array, start, j - 1);
-				threads--;
-			}
-			else if (j - start > 0)
-				rsort(array, start, j - 1);
-			if ((threshold < end - (j + 1)) && threads>0) {
-				t2 = new std::thread(&PQuickSort::psort, this, array, j + 1, end);
-				threads--;
-			}
-			else if (end - (j + 1) > 0)
-				rsort(array, j + 1, end);
+		else if (j - start > 0)
+			rsort(array, start, j - 1);
+		if ((threshold < end - (j + 1)) && threads>0) {
+			t2 = new std::thread(&PQuickSort::psort, this, array, j + 1, end);
+			threads--;
 		}
+		else if (end - (j + 1) > 0)
+			rsort(array, j + 1, end);
 		if (t1 != nullptr) {
 			t1->join();
 			threads++;
